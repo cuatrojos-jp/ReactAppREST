@@ -1,0 +1,165 @@
+﻿#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+.card {
+    padding: 2em;
+}
+
+/* Hamburger Button Styles */
+.hamburger-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 24px;
+    padding: 0;
+    z-index: 1001;
+}
+
+    .hamburger-btn span {
+        display: block;
+        height: 3px;
+        width: 100%;
+        background-color: white;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .hamburger-btn:hover span {
+        background-color: #ccc;
+    }
+
+/* Drawer Overlay */
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Drawer Menu */
+.drawer-menu {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100%;
+    background-color: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.drawer-open {
+    left: 0;
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #007bff;
+    color: white;
+    border-bottom: 1px solid #dee2e6;
+}
+
+    .drawer-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .close-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+    }
+
+.drawer-content {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.drawer-item {
+    background: none;
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    color: #333;
+}
+
+    .drawer-item:hover {
+        background-color: #f8f9fa;
+        border-color: #007bff;
+        color: #007bff;
+    }
+
+    .drawer-item:active {
+        background-color: #e9ecef;
+    }
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .drawer-menu {
+        width: 100%;
+        left: -100%;
+    }
+
+    .drawer-open {
+        left: 0;
+    }
+
+    .hamburger-btn {
+        width: 28px;
+        height: 22px;
+    }
+}
+
+/* Ensure body doesn't scroll when drawer is open */
+body.drawer-open {
+    overflow: hidden;
+}
