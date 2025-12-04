@@ -12,15 +12,14 @@ type ParsedRow = Record<string, unknown>;
 
 const DEFAULT_BASE = 'https://localhost:7231/api/CaAlumnos';
 
-type UploadFinishedPayload = { count: number };
-
 export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT_BASE }) => {
     const [fileName, setFileName] = useState<string | null>(null);
     const [rows, setRows] = useState<ParsedRow[]>([]);
     const [sending, setSending] = useState(false);
     const [progress, setProgress] = useState<{ sent: number; total: number } | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [step, setStep] = useState<1 | 2 | 3>(1);
+    const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // Added step 4 for success screen
+    const [uploadedCount, setUploadedCount] = useState<number>(0);
     const [effectiveApiBase, setEffectiveApiBase] = useState<string>(apiBase);
 
     // Detect popup mode (mounted in a popup window) by query param or presence of opener
@@ -55,7 +54,7 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
         // on unmount notify opener if popup
         return () => {
             try {
-                if (isPopupMode) {
+                if (isPopupMode && !window.closed) {
                     window.opener?.postMessage({ type: 'upload:closed' }, window.location.origin);
                 }
             } catch {
@@ -180,17 +179,11 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
         };
     };
 
-    const notifyOpenerAndClose = (payload: UploadFinishedPayload) => {
+    const notifyOpenerFinished = (count: number) => {
         try {
             if (isPopupMode && window.opener) {
-                window.opener.postMessage({ type: 'upload:finished', data: payload }, window.location.origin);
+                window.opener.postMessage({ type: 'upload:finished', data: { count } }, window.location.origin);
             }
-        } catch {
-            // ignore
-        }
-        // close popup if running in one
-        try {
-            if (isPopupMode) window.close();
         } catch {
             // ignore
         }
@@ -219,10 +212,10 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
             });
 
             if (resp.ok) {
-                setProgress({ sent: rows.length, total: rows.length });
                 setSending(false);
-                notifyOpenerAndClose({ count: rows.length });
-                if (onClose) onClose();
+                setUploadedCount(rows.length);
+                notifyOpenerFinished(rows.length);
+                setStep(4); // Go to success screen
                 return;
             }
 
@@ -243,35 +236,35 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                     setProgress({ sent: i + 1, total: mapped.length });
                 }
                 setSending(false);
-                notifyOpenerAndClose({ count: rows.length });
-                if (onClose) onClose();
+                setUploadedCount(rows.length);
+                notifyOpenerFinished(rows.length);
+                setStep(4); // Go to success screen
             }
         } catch (ex: unknown) {
-            setError((ex as Error)?.message ?? String(ex));
+            // eslint-disable-next-line no-console
+            console.error("Upload failed:", ex);
+            setError("Error al subir uno o más registros del archivo seleccionado");
             setSending(false);
         }
     };
 
     const closeWizard = () => {
-        try {
-            if (isPopupMode && window.opener) {
-                window.opener.postMessage({ type: 'upload:closed' }, window.location.origin);
-            }
-        } catch {
-            // ignore
+        if (onClose) {
+            onClose();
         }
-        if (onClose) onClose();
-        try {
-            if (isPopupMode) window.close();
-            else {
-                // reset to step 1 when used inline
-                setRows([]);
-                setFileName(null);
-                setError(null);
-                setStep(1);
+
+        if (isPopupMode) {
+            try {
+                window.close();
+            } catch {
+                // ignore
             }
-        } catch {
-            // ignore
+        } else {
+            // Reset to initial state if inline
+            setStep(1);
+            setRows([]);
+            setFileName(null);
+            setError(null);
         }
     };
 
@@ -289,15 +282,6 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                     {error && <div className="alert alert-danger py-1">{error}</div>}
 
                     <div className="d-flex align-items-center gap-2">
-                        <button className="btn btn-primary btn-sm" onClick={() => {
-                            // If a file is already selected, start parsing; otherwise do nothing.
-                            // Parsing already starts on file selection; keep this for explicit "continue".
-                            if (fileName) {
-                                // do nothing (parsing handled on change)
-                            }
-                        }}>
-                            Seleccionar
-                        </button>
                         <button className="btn btn-secondary btn-sm" onClick={closeWizard}>
                             Cerrar
                         </button>
@@ -360,6 +344,19 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                         )}
                     </div>
                 </>
+            )}
+
+            {step === 4 && (
+                <div className="text-center py-4">
+                    <div className="mb-3" style={{ fontSize: '2rem' }}>
+                        &#x2705; {/* Checkmark symbol */}
+                    </div>
+                    <h5>Carga Exitosa</h5>
+                    <p className="mb-4">{uploadedCount} registros fueron subidos correctamente.</p>
+                    <button className="btn btn-primary" onClick={closeWizard}>
+                        Cerrar
+                    </button>
+                </div>
             )}
         </div>
     );

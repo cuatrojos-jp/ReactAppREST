@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Alumnos from "./components/alumnos/Alumnos.tsx";
 import Grados from "./pages/Grados";
@@ -7,13 +7,32 @@ import DrawerMenu from "./components/DrawerMenu";
 import { AlumnoUploadWizard } from "./components/alumnos/AlumnoUploadWizard";
 
 const App = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    // Initialize state from localStorage.
+    const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('isLoggedIn'));
+
+    // This effect will sync the login state across tabs/windows.
+    useEffect(() => {
+        const syncLogout = (event: StorageEvent) => {
+            if (event.key === 'isLoggedIn' && event.newValue === null) {
+                setIsLoggedIn(false);
+            }
+        };
+
+        window.addEventListener('storage', syncLogout);
+
+        return () => {
+            window.removeEventListener('storage', syncLogout);
+        };
+    }, []);
+
 
     const handleLogin = () => {
         setIsLoggedIn(true);
     };
 
     const handleLogout = () => {
+        // Remove the flag from localStorage on logout.
+        localStorage.removeItem('isLoggedIn');
         setIsLoggedIn(false);
     };
 

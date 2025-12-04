@@ -57,6 +57,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 });
 
                 if (response.ok) {
+                    // Set a flag in localStorage to indicate the user is logged in.
+                    localStorage.setItem('isLoggedIn', 'true');
                     onLogin();
                 } else if (response.status === 401) {
                     setError('Credenciales inv\u00E1lidas');
