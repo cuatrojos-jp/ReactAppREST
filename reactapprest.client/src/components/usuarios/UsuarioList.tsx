@@ -24,7 +24,7 @@ const UsuarioList: React.FC<Props> = ({ usuarios, onEdit, onDelete }) => {
                     <tr key={u.usuarioId}>
                         <td>{u.usuarioNombre}</td>
                         <td>{`${u.usuarioApPat || ''} ${u.usuarioApMat || ''}`}</td>
-                        <td>{u.usuarioActivo ? 'Sí' : 'No'}</td>
+                        <td>{u.usuarioActivo ? 'S\u00ED' : 'No'}</td>
                         <td>{u.perfilIds.length}</td>
                         <td>
                             <button className="btn btn-sm btn-warning me-2" onClick={() => onEdit(u)}>

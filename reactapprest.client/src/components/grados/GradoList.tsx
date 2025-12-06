@@ -13,7 +13,7 @@ const GradoList: React.FC<GradoListProps> = ({ grados, onEdit, onDelete }) => {
             <table className="table table-striped table-bordered align-middle shadow-sm">
                 <thead className="table-primary">
                     <tr>
-                        <th>Descripción</th>
+                        <th>Descripci&oacute;n</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>

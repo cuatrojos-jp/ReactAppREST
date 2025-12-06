@@ -32,27 +32,23 @@ export const AlumnoForm: React.FC<AlumnoFormProps> = ({
         const popup = window.open(url, 'AlumnoUploadWizard', features);
 
         if (!popup) {
-            // popup blocked - fallback to inline wizard
             console.warn('Popup blocked, opening inline wizard.');
             setShowUpload(true);
             return;
         }
 
-        // Listen for messages from popup
         const onMessage = (ev: MessageEvent) => {
             if (ev.origin !== window.location.origin) return;
             const msg = ev.data;
             if (!msg || typeof msg !== 'object') return;
 
             if (msg.type === 'ready') {
-                // send init data (relative apiBase used by default)
                 try {
                     popup.postMessage({ type: 'init', apiBase: '/api/CaAlumnos' }, window.location.origin);
                 } catch {
                     // ignore
                 }
             } else if (msg.type === 'upload:finished') {
-                // Optionally refresh list - simple approach: reload page to refresh data
                 try {
                     window.location.reload();
                 } catch {
@@ -61,14 +57,12 @@ export const AlumnoForm: React.FC<AlumnoFormProps> = ({
                     window.removeEventListener('message', onMessage);
                 }
             } else if (msg.type === 'upload:closed') {
-                // popup closed without uploading
                 window.removeEventListener('message', onMessage);
             }
         };
 
         window.addEventListener('message', onMessage);
 
-        // monitor popup closed to cleanup listener
         const interval = window.setInterval(() => {
             if (!popup || popup.closed) {
                 window.clearInterval(interval);
@@ -192,7 +186,6 @@ export const AlumnoForm: React.FC<AlumnoFormProps> = ({
                 </div>
             </form>
 
-            {/* Inline fallback for the wizard */}
             {showUpload && (
                 <AlumnoUploadWizard
                     onClose={() => setShowUpload(false)}

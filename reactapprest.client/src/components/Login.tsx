@@ -9,6 +9,9 @@ const API_URL = "https://localhost:7231/api/Usuarios";
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const [usuarioNombre, setUsuarioNombre] = useState('');
     const [usuarioPw, setUsuarioPw] = useState('');
+    const [usuarioApPat, setUsuarioApPat] = useState('');
+    const [usuarioApMat, setUsuarioApMat] = useState('');
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -22,7 +25,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         try {
             if (isRegistering) {
-                // Create new user (POST: api/Usuarios)
                 const response = await fetch(`${API_URL}`, {
                     method: 'POST',
                     headers: {
@@ -30,21 +32,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     },
                     body: JSON.stringify({
                         UsuarioNombre: usuarioNombre,
-                        UsuarioPw: usuarioPw
+                        UsuarioApPat: usuarioApPat,
+                        UsuarioApMat: usuarioApMat,
+                        UsuarioPw: usuarioPw,
+                        UsuarioActivo: true
                     }),
                 });
 
                 if (response.status === 201 || response.ok) {
-                    setSuccess('Registro exitoso. Por favor inicie sesi\u00F3n.');
+                    setSuccess('Registro exitoso. Por favor inicie sesi\u00f3n.');
                     setIsRegistering(false);
                     setUsuarioPw('');
-                    // keep usuarioNombre so user can login easily
+                    setUsuarioApPat('');
+                    setUsuarioApMat('');
                 } else {
                     const data = await response.json().catch(() => null);
                     setError(data?.mensaje ?? 'Error al registrar usuario');
                 }
             } else {
-                // Login (POST: api/Usuarios/login)
                 const response = await fetch(`${API_URL}/login`, {
                     method: 'POST',
                     headers: {
@@ -57,18 +62,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 });
 
                 if (response.ok) {
-                    // Set a flag in localStorage to indicate the user is logged in.
                     localStorage.setItem('isLoggedIn', 'true');
                     onLogin();
                 } else if (response.status === 401) {
-                    setError('Credenciales inv\u00E1lidas');
+                    setError('Credenciales inv&aacute;lidas');
                 } else {
                     const data = await response.json().catch(() => null);
                     setError(data?.mensaje ?? 'Error en el servidor');
                 }
             }
         } catch {
-            setError('Error de conexi\u00F3n');
+            setError('Error de conexi&oacute;n');
         } finally {
             setLoading(false);
         }
@@ -84,22 +88,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         {error && (
                             <div className="alert alert-danger alert-dismissible fade show" role="alert">
                                 {error}
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setError('')}
-                                ></button>
+                                <button type="button" className="btn-close" onClick={() => setError('')}></button>
                             </div>
                         )}
 
                         {success && (
                             <div className="alert alert-success alert-dismissible fade show" role="alert">
                                 {success}
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setSuccess('')}
-                                ></button>
+                                <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
                             </div>
                         )}
 
@@ -113,11 +109,37 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                         <form onSubmit={handleSubmit}>
                             <div className="row g-3">
+                                {isRegistering && (
+                                    <>
+                                        <div className="col-12">
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Apellido Paterno"
+                                                value={usuarioApPat}
+                                                onChange={(e) => setUsuarioApPat(e.target.value)}
+                                                required={isRegistering}
+                                                disabled={loading}
+                                            />
+                                        </div>
+                                        <div className="col-12">
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Apellido Materno"
+                                                value={usuarioApMat}
+                                                onChange={(e) => setUsuarioApMat(e.target.value)}
+                                                disabled={loading}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
                                 <div className="col-12">
                                     <input
                                         type="text"
                                         className="form-control"
-                                        placeholder="Usuario"
+                                        placeholder="Nombre de Usuario"
                                         value={usuarioNombre}
                                         onChange={(e) => setUsuarioNombre(e.target.value)}
                                         required
@@ -148,11 +170,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                                         >
                                             Cancelar
                                         </button>
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary"
-                                            disabled={loading}
-                                        >
+                                        <button type="submit" className="btn btn-primary" disabled={loading}>
                                             {loading ? "Procesando..." : "Registrar"}
                                         </button>
                                     </>
@@ -166,12 +184,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                                         >
                                             Registrarse
                                         </button>
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary"
-                                            disabled={loading}
-                                        >
-                                            {loading ? "Iniciando sesi\u00F3n..." : "Iniciar Sesi\u00F3n"}
+                                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                                            {loading ? "Iniciando sesion" : "Iniciar Sesion"}
                                         </button>
                                     </>
                                 )}

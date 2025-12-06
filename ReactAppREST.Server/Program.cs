@@ -1,58 +1,39 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ReactAppREST.Server.Models;
-using ReactAppREST.Server.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
-//var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-//var allowedOrigins = new[]
-//{
-//    "http://localhost:3000",
-//    "http://localhost:5173",
-//    "https://localhost:62909",
-//    "https://localhost:7231"
-//};
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy(MyAllowSpecificOrigins,
-//                          policy =>
-//                          {
-//                              policy.WithOrigins("https://localhost:62909")
-//                                                  .AllowAnyHeader()
-//                                                  .AllowAnyMethod()
-//                                                  .AllowCredentials();
-//                          });
-//    options.AddPolicy("NuevaPolitica", app =>
-//    {
-//        app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-//    });
-//});
+builder.Services.AddDbContext<SemestrefrontContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
+    options.AddPolicy("MyAllowSpecificOrigins",
+        policy =>
         {
-            builder.AllowAnyOrigin()
+            policy.WithOrigins("https://localhost:5173")
                    .AllowAnyHeader()
                    .AllowAnyMethod();
         });
+    options.AddPolicy("AllowAllOrigins",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<SemestrefrontContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
 app.UseDefaultFiles();
+
 app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -61,7 +42,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAllOrigins");
+app.UseCors("MyAllowSpecificOrigins");
 
 app.UseAuthorization();
 

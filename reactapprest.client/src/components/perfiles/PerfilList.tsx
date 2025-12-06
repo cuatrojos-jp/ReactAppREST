@@ -28,7 +28,7 @@ const PerfilList: React.FC<Props> = ({ perfiles, onEdit, onDelete }) => {
                                 {p.usuariosCount}
                             </Link>
                         </td>
-                        <td>{p.perfilActivo ? 'Sí' : 'No'}</td>
+                        <td>{p.perfilActivo ? 'S\u00ED' : 'No'}</td>
                         <td>
                             <button className="btn btn-sm btn-warning me-2" onClick={() => onEdit(p)}>
                                 Editar

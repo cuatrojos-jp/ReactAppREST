@@ -18,11 +18,10 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
     const [sending, setSending] = useState(false);
     const [progress, setProgress] = useState<{ sent: number; total: number } | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // Added step 4 for success screen
+    const [step, setStep] = useState<1 | 2 | 3 | 4>(1); 
     const [uploadedCount, setUploadedCount] = useState<number>(0);
     const [effectiveApiBase, setEffectiveApiBase] = useState<string>(apiBase);
 
-    // Detect popup mode (mounted in a popup window) by query param or presence of opener
     const isPopupMode = (() => {
         try {
             const params = new URLSearchParams(window.location.search);
@@ -33,7 +32,6 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
     })();
 
     useEffect(() => {
-        // If running as standalone/popup, listen for init messages from opener
         const onMessage = (ev: MessageEvent) => {
             if (ev.origin !== window.location.origin) return;
             const data = ev.data;
@@ -44,14 +42,12 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
         };
         window.addEventListener('message', onMessage);
 
-        // tell the opener we're ready (it may post init data)
         try {
             window.opener?.postMessage({ type: 'ready' }, window.location.origin);
         } catch {
             // ignore
         }
 
-        // on unmount notify opener if popup
         return () => {
             try {
                 if (isPopupMode && !window.closed) {
@@ -62,16 +58,13 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
             }
             window.removeEventListener('message', onMessage);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const resolveBase = (base: string) => {
-        // If full URL, return as-is.
         try {
             const u = new URL(base);
             return u.toString().replace(/\/+$/, '');
         } catch {
-            // relative path: build absolute using current origin but force port 7231
             const origin = window.location.origin;
             try {
                 const originUrl = new URL(origin);
@@ -90,7 +83,7 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
         setFileName(file?.name ?? null);
         if (!file) return;
 
-        setStep(2); // go to loading step
+        setStep(2);
 
         try {
             const ext = file.name.split('.').pop()?.toLowerCase();
@@ -100,7 +93,7 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                     skipEmptyLines: true,
                     complete: (results) => {
                         setRows(results.data as ParsedRow[]);
-                        setStep(3); // preview step
+                        setStep(3);
                     },
                     error: (err) => {
                         setError(`CSV parse error: ${err.message}`);
@@ -114,9 +107,9 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                 const sheet = workbook.Sheets[sheetName];
                 const json = XLSX.utils.sheet_to_json(sheet, { defval: '' }) as ParsedRow[];
                 setRows(json);
-                setStep(3); // preview step
+                setStep(3);
             } else {
-                setError('Unsupported file type. Use .csv, .xlsx or .xls');
+                setError('Tipo de archivo incorrecto. Utilize csv o xls.');
                 setStep(1);
             }
         } catch (ex: unknown) {
@@ -204,7 +197,6 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
             const base = resolveBase(effectiveApiBase);
             const bulkUrl = `${base}/bulk`;
 
-            // Try bulk first
             const resp = await fetch(bulkUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -215,11 +207,10 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                 setSending(false);
                 setUploadedCount(rows.length);
                 notifyOpenerFinished(rows.length);
-                setStep(4); // Go to success screen
+                setStep(4);
                 return;
             }
 
-            // If bulk not available, fallback to per-item
             if (resp.status === 404 || !resp.ok) {
                 for (let i = 0; i < mapped.length; i++) {
                     const url = base;
@@ -238,10 +229,9 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                 setSending(false);
                 setUploadedCount(rows.length);
                 notifyOpenerFinished(rows.length);
-                setStep(4); // Go to success screen
+                setStep(4);
             }
         } catch (ex: unknown) {
-            // eslint-disable-next-line no-console
             console.error("Upload failed:", ex);
             setError("Error al subir uno o más registros del archivo seleccionado");
             setSending(false);
@@ -260,7 +250,6 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
                 // ignore
             }
         } else {
-            // Reset to initial state if inline
             setStep(1);
             setRows([]);
             setFileName(null);
@@ -349,7 +338,7 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
             {step === 4 && (
                 <div className="text-center py-4">
                     <div className="mb-3" style={{ fontSize: '2rem' }}>
-                        &#x2705; {/* Checkmark symbol */}
+                        &#x2705;
                     </div>
                     <h5>Carga Exitosa</h5>
                     <p className="mb-4">{uploadedCount} registros fueron subidos correctamente.</p>

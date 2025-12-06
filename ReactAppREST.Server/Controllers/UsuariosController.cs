@@ -1,7 +1,9 @@
-Ôªøusing Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReactAppREST.Server.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ReactAppREST.Server.Controllers
 {
@@ -20,9 +22,18 @@ namespace ReactAppREST.Server.Controllers
         // GET: api/Usuarios
         [HttpGet]
         [EnableCors("AllowAllOrigins")]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<UsuarioDto>>> GetUsuarios()
         {
             var usuarios = await _context.Usuarios
+                .Select(u => new UsuarioDto
+                {
+                    UsuarioId = u.UsuarioId,
+                    UsuarioNombre = u.UsuarioNombre,
+                    UsuarioApPat = u.UsuarioApPat,
+                    UsuarioApMat = u.UsuarioApMat,
+                    UsuarioActivo = u.UsuarioActivo,
+                    PerfilIds = u.UsuarioPerfils.Select(up => up.PerfilId).ToList()
+                })
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -32,82 +43,145 @@ namespace ReactAppREST.Server.Controllers
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
         [EnableCors("AllowAllOrigins")]
-        public async Task<ActionResult<Usuario>> GetUsuario(int id)
+        public async Task<ActionResult<UsuarioDto>> GetUsuario(int id)
         {
-            var usuario = await _context.Usuarios
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.UsuarioId == id);
+            var usuarioDto = await _context.Usuarios
+                .Where(u => u.UsuarioId == id)
+                .Select(u => new UsuarioDto
+                {
+                    UsuarioId = u.UsuarioId,
+                    UsuarioNombre = u.UsuarioNombre,
+                    UsuarioApPat = u.UsuarioApPat,
+                    UsuarioApMat = u.UsuarioApMat,
+                    UsuarioActivo = u.UsuarioActivo,
+                    PerfilIds = u.UsuarioPerfils.Select(up => up.PerfilId).ToList()
+                })
+                .FirstOrDefaultAsync();
 
-            if (usuario == null)
+            if (usuarioDto == null)
                 return NotFound(new { mensaje = "Usuario no encontrado" });
 
-            return Ok(usuario);
+            return Ok(usuarioDto);
+        }
+
+        // POST: api/Usuarios/login (Sin cambios)
+        [HttpPost("login")]
+        [EnableCors("AllowAllOrigins")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            if (loginRequest == null || string.IsNullOrWhiteSpace(loginRequest.UsuarioNombre))
+                return BadRequest(new { mensaje = "Datos de login inv·lidos" });
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.UsuarioNombre == loginRequest.UsuarioNombre);
+
+            var hashedRequestPassword = HashPassword(loginRequest.UsuarioPw);
+
+            if (usuario == null || usuario.UsuarioPw != hashedRequestPassword)
+            {
+                return Unauthorized(new { mensaje = "Credenciales inv·lidas" });
+            }
+
+            if (usuario.UsuarioActivo != true)
+            {
+                return Unauthorized(new { mensaje = "El usuario no est· activo." });
+            }
+
+            return Ok(new { mensaje = "Login exitoso" });
         }
 
         // POST: api/Usuarios
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
-        public async Task<ActionResult<Usuario>> PostUsuario([FromBody] Usuario usuario)
+        public async Task<ActionResult<UsuarioDto>> PostUsuario(UsuarioCreateDto usuarioDto)
         {
-            if (usuario == null)
-                return BadRequest(new { mensaje = "Datos de usuario inv√°lidos" });
+            if (await _context.Usuarios.AnyAsync(u => u.UsuarioNombre == usuarioDto.UsuarioNombre))
+            {
+                return Conflict(new { mensaje = "El nombre de usuario ya existe." });
+            }
+
+            var usuario = new Usuario
+            {
+                UsuarioNombre = usuarioDto.UsuarioNombre,
+                UsuarioApPat = usuarioDto.UsuarioApPat,
+                UsuarioApMat = usuarioDto.UsuarioApMat,
+                UsuarioPw = HashPassword(usuarioDto.UsuarioPw),
+                UsuarioActivo = usuarioDto.UsuarioActivo ?? true
+            };
+
+            // Asignar perfiles
+            if (usuarioDto.PerfilIds.Any())
+            {
+                var perfiles = await _context.Perfils.Where(p => usuarioDto.PerfilIds.Contains(p.PerfilId)).ToListAsync();
+                foreach (var perfil in perfiles)
+                {
+                    // La tabla de uniÛn se crea aquÌ
+                    usuario.UsuarioPerfils.Add(new UsuarioPerfil { Perfil = perfil });
+                }
+            }
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.UsuarioId }, usuario);
-        }
+            var usuarioCreadoDto = new UsuarioDto
+            {
+                UsuarioId = usuario.UsuarioId,
+                UsuarioNombre = usuario.UsuarioNombre,
+                UsuarioApPat = usuario.UsuarioApPat,
+                UsuarioApMat = usuario.UsuarioApMat,
+                UsuarioActivo = usuario.UsuarioActivo,
+                PerfilIds = usuario.UsuarioPerfils.Select(up => up.PerfilId).ToList()
+            };
 
-        // POST: api/Usuarios/login
-        // Login based on UsuarioNombre + UsuarioPw to match the Usuario model
-        [HttpPost("login")]
-        [EnableCors("AllowAllOrigins")]
-        public async Task<ActionResult<Usuario>> Login([FromBody] LoginRequest loginRequest)
-        {
-            if (loginRequest == null || string.IsNullOrWhiteSpace(loginRequest.UsuarioNombre))
-                return BadRequest(new { mensaje = "Datos de login inv√°lidos" });
-
-            var usuario = await _context.Usuarios
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.UsuarioNombre == loginRequest.UsuarioNombre);
-
-            if (usuario == null || usuario.UsuarioPw != loginRequest.UsuarioPw)
-                return Unauthorized(new { mensaje = "Credenciales inv√°lidas" });
-
-            return Ok(usuario);
+            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.UsuarioId }, usuarioCreadoDto);
         }
 
         // PUT: api/Usuarios/5
         [HttpPut("{id}")]
         [EnableCors("AllowAllOrigins")]
-        public async Task<IActionResult> PutUsuario(int id, [FromBody] Usuario usuario)
+        public async Task<IActionResult> PutUsuario(int id, UsuarioUpdateDto usuarioDto)
         {
-            if (usuario == null || id != usuario.UsuarioId)
-                return BadRequest(new { mensaje = "El ID del usuario no coincide o datos inv√°lidos" });
+            var usuarioExistente = await _context.Usuarios
+                .Include(u => u.UsuarioPerfils) // Incluir perfiles existentes
+                .FirstOrDefaultAsync(u => u.UsuarioId == id);
 
-            var usuarioExistente = await _context.Usuarios.FindAsync(id);
             if (usuarioExistente == null)
                 return NotFound(new { mensaje = "Usuario no encontrado" });
 
-            // Update allowed fields (password and name)
-            usuarioExistente.UsuarioPw = usuario.UsuarioPw;
-            usuarioExistente.UsuarioNombre = usuario.UsuarioNombre;
+            // Actualizar propiedades del usuario
+            usuarioExistente.UsuarioNombre = usuarioDto.UsuarioNombre;
+            usuarioExistente.UsuarioApPat = usuarioDto.UsuarioApPat;
+            usuarioExistente.UsuarioApMat = usuarioDto.UsuarioApMat;
+            usuarioExistente.UsuarioActivo = usuarioDto.UsuarioActivo;
 
-            _context.Entry(usuarioExistente).State = EntityState.Modified;
+            if (!string.IsNullOrWhiteSpace(usuarioDto.UsuarioPw))
+            {
+                usuarioExistente.UsuarioPw = HashPassword(usuarioDto.UsuarioPw);
+            }
 
-            try
+            // Sincronizar perfiles
+            var perfilesActualesIds = usuarioExistente.UsuarioPerfils.Select(up => up.PerfilId).ToList();
+            var perfilesNuevosIds = usuarioDto.PerfilIds;
+
+            var perfilesParaEliminar = usuarioExistente.UsuarioPerfils
+                .Where(up => !perfilesNuevosIds.Contains(up.PerfilId)).ToList();
+            _context.UsuarioPerfils.RemoveRange(perfilesParaEliminar);
+
+            var perfilesParaAgregarIds = perfilesNuevosIds.Except(perfilesActualesIds).ToList();
+            var perfilesParaAgregar = await _context.Perfils
+                .Where(p => perfilesParaAgregarIds.Contains(p.PerfilId)).ToListAsync();
+            
+            foreach (var perfil in perfilesParaAgregar)
             {
-                await _context.SaveChangesAsync();
+                usuarioExistente.UsuarioPerfils.Add(new UsuarioPerfil { Perfil = perfil });
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(500, new { mensaje = "Error al actualizar el usuario" });
-            }
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // DELETE: api/Usuarios/5
+        // DELETE: api/Usuarios/5 (Sin cambios)
         [HttpDelete("{id}")]
         [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> DeleteUsuario(int id)
@@ -121,11 +195,49 @@ namespace ReactAppREST.Server.Controllers
 
             return NoContent();
         }
+
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return BitConverter.ToString(hashedBytes).Replace("-", "").ToLowerInvariant();
+        }
     }
 
+    // --- DTOs (Data Transfer Objects) para la API ---
     public class LoginRequest
     {
         public string UsuarioNombre { get; set; } = null!;
         public string UsuarioPw { get; set; } = null!;
+    }
+
+    public class UsuarioCreateDto
+    {
+        public string? UsuarioNombre { get; set; }
+        public string? UsuarioApPat { get; set; }
+        public string? UsuarioApMat { get; set; }
+        public string UsuarioPw { get; set; } = null!;
+        public bool? UsuarioActivo { get; set; }
+        public List<int> PerfilIds { get; set; } = new List<int>();
+    }
+
+    public class UsuarioUpdateDto
+    {
+        public string? UsuarioNombre { get; set; }
+        public string? UsuarioApPat { get; set; }
+        public string? UsuarioApMat { get; set; }
+        public string? UsuarioPw { get; set; } // Opcional
+        public bool? UsuarioActivo { get; set; }
+        public List<int> PerfilIds { get; set; } = new List<int>();
+    }
+
+    public class UsuarioDto
+    {
+        public int UsuarioId { get; set; }
+        public string? UsuarioNombre { get; set; }
+        public string? UsuarioApPat { get; set; }
+        public string? UsuarioApMat { get; set; }
+        public bool? UsuarioActivo { get; set; }
+        public List<int> PerfilIds { get; set; } = new List<int>();
     }
 }

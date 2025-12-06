@@ -108,7 +108,6 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ onLogout }) => {
 
     return (
         <>
-            {/* Hamburger Button */}
             <button
                 type="button"
                 className="hamburger-btn"
@@ -121,7 +120,6 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ onLogout }) => {
                 <span></span>
             </button>
 
-            {/* Offcanvas (controlled manually so Bootstrap JS is not required) */}
             <div
                 className={`offcanvas offcanvas-start ${isOpen ? 'show' : ''}`}
                 style={{ visibility: isOpen ? 'visible' : 'hidden' }}
@@ -131,7 +129,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ onLogout }) => {
             >
                 <div className="offcanvas-header">
                     <h5 className="offcanvas-title" id="offcanvasMenuLabel">
-                        Navigation
+                        Navegaci&oacute;n
                     </h5>
                     <button
                         type="button"
@@ -163,9 +161,25 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ onLogout }) => {
                             <i className="bi bi-book me-2"></i>
                             Grados
                         </button>
+                        <button
+                            className="btn btn-outline-info text-start"
+                            onClick={() => handleNavigation("/usuarios")}
+                        >
+                            <i className="bi bi-person-badge me-2"></i>
+                            Usuarios
+                        </button>
+                        <button
+                            className="btn btn-outline-warning text-start"
+                            onClick={() => handleNavigation("/perfiles")}
+                        >
+                            <i className="bi bi-shield-lock me-2"></i>
+                            Perfiles
+                        </button>
+
+                        <hr />
 
                         <button
-                            className="btn btn-outline-danger text-start mt-4"
+                            className="btn btn-outline-danger text-start"
                             onClick={handleLogout}
                         >
                             <i className="bi bi-box-arrow-right me-2"></i>
@@ -175,7 +189,6 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ onLogout }) => {
                 </div>
             </div>
 
-            {/* Backdrop */}
             {isOpen && <div className="offcanvas-backdrop fade show" onClick={toggleDrawer}></div>}
         </>
     );

@@ -41,7 +41,7 @@ const GradoForm: React.FC<GradoFormProps> = ({ onSubmit, onUpdate, onCancel, edi
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Descripción del Grado"
+                        placeholder="Descripci&oacute;n del Grado"
                         name="caGradTDescripcion"
                         value={form.caGradTDescripcion}
                         onChange={handleChange}
