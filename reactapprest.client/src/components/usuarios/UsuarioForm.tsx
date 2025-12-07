@@ -30,7 +30,7 @@ const UsuarioForm: React.FC<Props> = ({ onSubmit, onUpdate, onCancel, editingUsu
                 usuarioApMat: editingUsuario.usuarioApMat || '',
                 usuarioActivo: editingUsuario.usuarioActivo ?? true,
                 perfilIds: editingUsuario.perfilIds || [],
-                usuarioPw: '', // La contraseña se deja en blanco por seguridad
+                usuarioPw: '',
             });
         } else {
             setForm(initialFormState);
@@ -48,8 +48,8 @@ const UsuarioForm: React.FC<Props> = ({ onSubmit, onUpdate, onCancel, editingUsu
     const handlePerfilChange = (perfilId: number) => {
         setForm(prev => {
             const newPerfilIds = prev.perfilIds.includes(perfilId)
-                ? prev.perfilIds.filter(id => id !== perfilId) // Si ya está, lo quita
-                : [...prev.perfilIds, perfilId]; // Si no está, lo añade
+                ? prev.perfilIds.filter(id => id !== perfilId)
+                : [...prev.perfilIds, perfilId];
             return { ...prev, perfilIds: newPerfilIds };
         });
     };
@@ -69,7 +69,6 @@ const UsuarioForm: React.FC<Props> = ({ onSubmit, onUpdate, onCancel, editingUsu
         <form onSubmit={handleSubmit} className="border rounded p-4 mb-5 shadow-sm">
             <h5 className="mb-3">{isEditing ? 'Editar Usuario' : 'Agregar Usuario'}</h5>
             <div className="row g-3">
-                {/* Campos del formulario */}
                 <div className="col-md-4">
                     <input type="text" name="usuarioNombre" value={form.usuarioNombre || ''} onChange={handleChange} className="form-control" placeholder="Nombre de Usuario" required />
                 </div>
@@ -83,7 +82,6 @@ const UsuarioForm: React.FC<Props> = ({ onSubmit, onUpdate, onCancel, editingUsu
                     <input type="password" name="usuarioPw" value={form.usuarioPw || ''} onChange={handleChange} className="form-control" placeholder={isEditing ? "Nueva Contraseña (opcional)" : "Contraseña"} required={!isEditing} />
                 </div>
 
-                {/* Tabla de Perfiles con Scroll */}
                 <div className="col-md-4">
                     <h6>Perfiles</h6>
                     <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
