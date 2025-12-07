@@ -24,7 +24,6 @@ const Perfiles: React.FC = () => {
         setIsFormVisible(false);
     };
 
-    // CORRECCIÓN: Separamos la lógica de creación y actualización
     const handleCreateSubmit = (form: PerfilFormData) => {
         handleAdd(form);
         setIsFormVisible(false);

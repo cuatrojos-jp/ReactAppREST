@@ -15,7 +15,7 @@ export const AlumnoTable: React.FC<AlumnoTableProps> = ({
     onDelete,
 }) => {
     const handleDelete = (id: number) => {
-        if (confirm("¿Desea eliminar este alumno?")) {
+        if (confirm("\u2E2EDesea eliminar este alumno?")) {
             onDelete(id);
         }
     };

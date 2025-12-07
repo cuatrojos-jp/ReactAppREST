@@ -24,7 +24,6 @@ const Usuarios: React.FC = () => {
         setIsFormVisible(false);
     };
 
-    // CORRECCIÓN: Separamos la lógica de creación y actualización
     const handleCreateSubmit = (form: UsuarioFormData) => {
         handleAdd(form);
         setIsFormVisible(false);

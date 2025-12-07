@@ -225,7 +225,7 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
             }
         } catch (ex: unknown) {
             console.error("Upload failed:", ex);
-            setError("Error al subir uno o m·s registros del archivo seleccionado");
+            setError("Error al subir uno o m√°s registros del archivo seleccionado");
             setSending(false);
         }
     };
