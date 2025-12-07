@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using ReactAppREST.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,9 +10,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowVercelApp",
         policy =>
         {
-            // You will replace "https://your-vercel-app.vercel.app" with your actual frontend URL later.
-            // For now, you can add your local development URL as well.
-            policy.WithOrigins("https://your-vercel-app.vercel.app", "http://localhost:5173")
+            // Add the specific Vercel URL from the error message
+            policy.WithOrigins("https://reactapprest-client-fs21qhhs6-juan-acostas-projects-6a1ced6a.vercel.app", "http://localhost:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -26,7 +26,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<SemestrefrontContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure the app to trust headers from a reverse proxy
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
 var app = builder.Build();
+
+// Use the forwarded headers middleware
+app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
