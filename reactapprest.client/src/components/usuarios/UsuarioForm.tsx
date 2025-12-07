@@ -79,7 +79,7 @@ const UsuarioForm: React.FC<Props> = ({ onSubmit, onUpdate, onCancel, editingUsu
                     <input type="text" name="usuarioApMat" value={form.usuarioApMat || ''} onChange={handleChange} className="form-control" placeholder="Apellido Materno" />
                 </div>
                 <div className="col-md-4">
-                    <input type="password" name="usuarioPw" value={form.usuarioPw || ''} onChange={handleChange} className="form-control" placeholder={isEditing ? "Nueva Contraseña (opcional)" : "Contraseña"} required={!isEditing} />
+                    <input type="password" name="usuarioPw" value={form.usuarioPw || ''} onChange={handleChange} className="form-control" placeholder={isEditing ? "Nueva ContraseÃ±a (opcional)" : "ContraseÃ±a"} required={!isEditing} />
                 </div>
 
                 <div className="col-md-4">
