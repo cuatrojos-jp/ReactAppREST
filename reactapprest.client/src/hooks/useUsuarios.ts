@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Usuario, UsuarioForm, Perfil } from '../types/usuarioTypes';
-import * as usuarioService from '../services/usuarioService';
-import * as perfilService from '../services/perfilService'; // Importar el servicio correcto
+import { usuarioService } from '../services/usuarioService';
+import { perfilService } from '../services/perfilService';
+import type { Usuario, UsuarioForm } from '../types/usuarioTypes';
+import type { Perfil } from '../types/perfilTypes';
 
 export const useUsuarios = () => {
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -11,43 +12,43 @@ export const useUsuarios = () => {
 
     const fetchUsuarios = useCallback(async () => {
         try {
-            setLoading(true);
-            const data = await usuarioService.getUsuarios();
+            const data = await usuarioService.getAll();
             setUsuarios(data);
         } catch (err) {
             setError((err as Error).message);
-        } finally {
-            setLoading(false);
         }
     }, []);
 
-    const fetchPerfilesActivos = useCallback(async () => {
+    const fetchPerfiles = useCallback(async () => {
         try {
-            // CORRECCIÓN: Pedimos solo los perfiles activos para el formulario
-            const data = await perfilService.getPerfiles({ solamenteActivos: true });
-            setPerfiles(data);
+            const data = await perfilService.getAll();
+            setPerfiles(data.filter(p => p.perfilActivo));
         } catch (err) {
             setError((err as Error).message);
         }
     }, []);
 
     useEffect(() => {
-        fetchUsuarios();
-        fetchPerfilesActivos();
-    }, [fetchUsuarios, fetchPerfilesActivos]);
+        const loadData = async () => {
+            setLoading(true);
+            await Promise.all([fetchUsuarios(), fetchPerfiles()]);
+            setLoading(false);
+        };
+        loadData();
+    }, [fetchUsuarios, fetchPerfiles]);
 
     const handleAdd = async (form: UsuarioForm) => {
         try {
-            await usuarioService.addUsuario(form);
+            await usuarioService.create(form);
             await fetchUsuarios();
         } catch (err) {
             setError((err as Error).message);
         }
     };
 
-    const handleUpdate = async (id: number, form: UsuarioForm) => {
+    const handleUpdate = async (id: number, form: Partial<UsuarioForm>) => {
         try {
-            await usuarioService.updateUsuario(id, form);
+            await usuarioService.update(id, form);
             await fetchUsuarios();
         } catch (err) {
             setError((err as Error).message);
@@ -55,22 +56,13 @@ export const useUsuarios = () => {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Desea eliminar este usuario?')) return;
         try {
-            await usuarioService.deleteUsuario(id);
+            await usuarioService.delete(id);
             await fetchUsuarios();
         } catch (err) {
             setError((err as Error).message);
         }
     };
 
-    return {
-        usuarios,
-        perfiles,
-        loading,
-        error,
-        handleAdd,
-        handleUpdate,
-        handleDelete,
-    };
+    return { usuarios, perfiles, loading, error, handleAdd, handleUpdate, handleDelete };
 };

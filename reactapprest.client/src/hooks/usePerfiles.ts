@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { perfilService } from '../services/perfilService';
 import type { Perfil, PerfilForm } from '../types/perfilTypes';
-import * as perfilService from '../services/perfilService';
 
 export const usePerfiles = () => {
     const [perfiles, setPerfiles] = useState<Perfil[]>([]);
@@ -10,7 +10,7 @@ export const usePerfiles = () => {
     const fetchPerfiles = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await perfilService.getPerfiles();
+            const data = await perfilService.getAll();
             setPerfiles(data);
         } catch (err) {
             setError((err as Error).message);
@@ -25,7 +25,7 @@ export const usePerfiles = () => {
 
     const handleAdd = async (form: PerfilForm) => {
         try {
-            await perfilService.addPerfil(form);
+            await perfilService.create(form);
             await fetchPerfiles();
         } catch (err) {
             setError((err as Error).message);
@@ -34,7 +34,7 @@ export const usePerfiles = () => {
 
     const handleUpdate = async (id: number, form: PerfilForm) => {
         try {
-            await perfilService.updatePerfil(id, form);
+            await perfilService.update(id, form);
             await fetchPerfiles();
         } catch (err) {
             setError((err as Error).message);
@@ -42,21 +42,13 @@ export const usePerfiles = () => {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Desea eliminar este perfil?')) return;
         try {
-            await perfilService.deletePerfil(id);
+            await perfilService.delete(id);
             await fetchPerfiles();
         } catch (err) {
             setError((err as Error).message);
         }
     };
 
-    return {
-        perfiles,
-        loading,
-        error,
-        handleAdd,
-        handleUpdate,
-        handleDelete,
-    };
+    return { perfiles, loading, error, handleAdd, handleUpdate, handleDelete };
 };

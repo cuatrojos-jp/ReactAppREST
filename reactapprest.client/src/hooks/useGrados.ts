@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import * as gradoService from "../services/gradoService";
-import type { Grado, GradoForm } from "../types/gradoTypes";
+import { useState, useEffect, useCallback } from 'react';
+import { gradoService } from '../services/gradoService';
+import type { Grado, GradoForm } from '../types/gradoTypes';
 
 export const useGrados = () => {
     const [grados, setGrados] = useState<Grado[]>([]);
@@ -8,13 +8,10 @@ export const useGrados = () => {
 
     const fetchGrados = useCallback(async () => {
         try {
-            const data = await gradoService.getGrados();
+            const data = await gradoService.getAll();
             setGrados(data);
-            setError(null);
         } catch (err) {
-            const message = err instanceof Error ? err.message : "An unknown error occurred";
-            setError(message);
-            console.error(err);
+            setError((err as Error).message);
         }
     }, []);
 
@@ -24,44 +21,30 @@ export const useGrados = () => {
 
     const handleAdd = async (form: GradoForm) => {
         try {
-            await gradoService.addGrado(form);
-            await fetchGrados();
+            await gradoService.create(form);
+            await fetchGrados(); // Re-fetch to update the list
         } catch (err) {
-            const message = err instanceof Error ? err.message : "An unknown error occurred";
-            setError(message);
-            console.error(err);
+            setError((err as Error).message);
         }
     };
 
     const handleUpdate = async (id: number, form: GradoForm) => {
         try {
-            await gradoService.updateGrado(id, form);
-            await fetchGrados();
+            await gradoService.update(id, form);
+            await fetchGrados(); // Re-fetch to update the list
         } catch (err) {
-            const message = err instanceof Error ? err.message : "An unknown error occurred";
-            setError(message);
-            console.error(err);
+            setError((err as Error).message);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("¿Desea eliminar este grado?")) return;
         try {
-            await gradoService.deleteGrado(id);
-            await fetchGrados();
+            await gradoService.delete(id);
+            await fetchGrados(); // Re-fetch to update the list
         } catch (err) {
-            const message = err instanceof Error ? err.message : "An unknown error occurred";
-            setError(message);
-            console.error(err);
+            setError((err as Error).message);
         }
     };
 
-    return {
-        grados,
-        error,
-        fetchGrados,
-        handleAdd,
-        handleUpdate,
-        handleDelete,
-    };
+    return { grados, error, handleAdd, handleUpdate, handleDelete };
 };

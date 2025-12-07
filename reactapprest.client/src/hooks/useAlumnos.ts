@@ -1,82 +1,60 @@
-import { useState, useEffect } from 'react';
-import type { Alumno, AlumnoForm } from '../types/alumnoTypes';
+import { useState, useEffect, useCallback } from 'react';
 import { alumnoService } from '../services/alumnoService';
+import type { Alumno, AlumnoForm } from '../types/alumnoTypes';
 
 export const useAlumnos = () => {
     const [alumnos, setAlumnos] = useState<Alumno[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchAlumnos = async () => {
-        setLoading(true);
-        setError(null);
+    const fetchAlumnos = useCallback(async () => {
         try {
+            setLoading(true);
             const data = await alumnoService.getAll();
             setAlumnos(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al cargar los alumnos');
+            setError((err as Error).message);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const createAlumno = async (alumnoData: AlumnoForm): Promise<boolean> => {
-        setLoading(true);
-        setError(null);
+    useEffect(() => {
+        fetchAlumnos();
+    }, [fetchAlumnos]);
+
+    const createAlumno = async (form: AlumnoForm) => {
         try {
-            await alumnoService.create(alumnoData);
+            await alumnoService.create(form);
             await fetchAlumnos();
             return true;
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al crear el alumno');
+            setError((err as Error).message);
             return false;
-        } finally {
-            setLoading(false);
         }
     };
 
-    const updateAlumno = async (id: number, alumnoData: AlumnoForm): Promise<boolean> => {
-        setLoading(true);
-        setError(null);
+    const updateAlumno = async (id: number, form: AlumnoForm) => {
         try {
-            await alumnoService.update(id, { ...alumnoData, caAlumNId: id });
+            await alumnoService.update(id, form);
             await fetchAlumnos();
             return true;
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al actualizar el alumno');
+            setError((err as Error).message);
             return false;
-        } finally {
-            setLoading(false);
         }
     };
 
-    const deleteAlumno = async (id: number): Promise<boolean> => {
-        setLoading(true);
-        setError(null);
+    const deleteAlumno = async (id: number) => {
         try {
             await alumnoService.delete(id);
             await fetchAlumnos();
             return true;
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al eliminar el alumno');
+            setError((err as Error).message);
             return false;
-        } finally {
-            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchAlumnos();
-    }, []);
-
-    return {
-        alumnos,
-        loading,
-        error,
-        fetchAlumnos,
-        createAlumno,
-        updateAlumno,
-        deleteAlumno,
-        setError,
-    };
+    return { alumnos, loading, error, createAlumno, updateAlumno, deleteAlumno, setError };
 };

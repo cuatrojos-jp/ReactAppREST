@@ -1,43 +1,58 @@
-import type { Alumno, AlumnoCreate, AlumnoUpdate } from '../types/alumnoTypes';
+import { API_URLS } from '../utils/constants';
+import type { Alumno, AlumnoForm } from '../types/alumnoTypes';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/CaAlumnos`;
+class AlumnoService {
+    private baseUrl = API_URLS.ALUMNOS;
 
-export const getAlumnos = async (): Promise<Alumno[]> => {
-    const response = await fetch(API_BASE_URL);
-    if (!response.ok) {
-        throw new Error('Failed to fetch alumnos');
+    async getAll(): Promise<Alumno[]> {
+        const response = await fetch(this.baseUrl);
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        // The backend returns data in a 'value' property for OData compatibility
+        const data = await response.json();
+        return data.value || data;
     }
-    return response.json();
-};
 
-export const createAlumno = async (alumno: AlumnoCreate): Promise<Alumno> => {
-    const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(alumno),
-    });
-    if (!response.ok) {
-        throw new Error('Failed to create alumno');
+    async create(alumno: AlumnoForm): Promise<Alumno> {
+        const response = await fetch(this.baseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(alumno),
+        });
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        return await response.json();
     }
-    return response.json();
-};
 
-export const updateAlumno = async (id: number, alumno: AlumnoUpdate): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(alumno),
-    });
-    if (!response.ok) {
-        throw new Error('Failed to update alumno');
+    async update(id: number, alumno: Partial<AlumnoForm>): Promise<Alumno> {
+        const response = await fetch(`${this.baseUrl}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(alumno),
+        });
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        // The update might return no content or the updated object
+        if (response.status === 204) {
+            // If no content, we can't return an Alumno, so we might need to refetch.
+            // For now, we'll assume the API returns the updated object or handle it in the hook.
+            return {} as Alumno; // Or handle appropriately
+        }
+        return await response.json();
     }
-};
 
-export const deleteAlumno = async (id: number): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-        method: 'DELETE',
-    });
-    if (!response.ok) {
-        throw new Error('Failed to delete alumno');
+    async delete(id: number): Promise<void> {
+        const response = await fetch(`${this.baseUrl}/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
     }
-};
+}
+
+// This is the crucial line that exports the single instance
+export const alumnoService = new AlumnoService();
