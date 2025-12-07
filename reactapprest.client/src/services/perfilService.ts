@@ -1,48 +1,48 @@
+import { API_URLS } from '../utils/constants';
 import type { Perfil, PerfilForm } from '../types/perfilTypes';
-import type { Usuario } from '../types/usuarioTypes'; // Importar tipo Usuario
+import type { Usuario } from '../types/usuarioTypes';
 
-const API_URL = 'https://localhost:7231/api/Perfiles';
+class PerfilService {
+    private baseUrl = API_URLS.PERFILES;
 
-export const getPerfiles = async (options?: { solamenteActivos: boolean }): Promise<Perfil[]> => {
-    let url = API_URL;
-    if (options?.solamenteActivos) {
-        url += '?solamenteActivos=true';
+    async getAll(): Promise<Perfil[]> {
+        const response = await fetch(this.baseUrl);
+        if (!response.ok) throw new Error('Failed to fetch perfiles');
+        return response.json();
     }
 
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Error al obtener los perfiles');
-    return response.json();
-};
+    async getUsuariosPorPerfil(id: number): Promise<Usuario[]> {
+        const response = await fetch(`${this.baseUrl}/${id}/usuarios`);
+        if (!response.ok) throw new Error('Failed to fetch usuarios for perfil');
+        return response.json();
+    }
 
-// Nueva función
-export const getUsuariosPorPerfil = async (perfilId: number): Promise<Usuario[]> => {
-    const response = await fetch(`${API_URL}/${perfilId}/usuarios`);
-    if (!response.ok) throw new Error('Error al obtener los usuarios del perfil');
-    return response.json();
-};
+    async create(perfil: PerfilForm): Promise<Perfil> {
+        const response = await fetch(this.baseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(perfil),
+        });
+        if (!response.ok) throw new Error('Failed to create perfil');
+        return response.json();
+    }
 
-export const addPerfil = async (perfil: PerfilForm): Promise<Perfil> => {
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(perfil),
-    });
-    if (!response.ok) throw new Error('Error al agregar el perfil');
-    return response.json();
-};
+    async update(id: number, perfil: PerfilForm): Promise<Perfil> {
+        const response = await fetch(`${this.baseUrl}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(perfil),
+        });
+        if (!response.ok) throw new Error('Failed to update perfil');
+        return response.json();
+    }
 
-export const updatePerfil = async (id: number, perfil: PerfilForm): Promise<void> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ perfilId: id, ...perfil }),
-    });
-    if (!response.ok) throw new Error('Error al actualizar el perfil');
-};
+    async delete(id: number): Promise<void> {
+        const response = await fetch(`${this.baseUrl}/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete perfil');
+    }
+}
 
-export const deletePerfil = async (id: number): Promise<void> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Error al eliminar el perfil');
-};
+export const perfilService = new PerfilService();

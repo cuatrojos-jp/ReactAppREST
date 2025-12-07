@@ -11,6 +11,8 @@ interface AlumnoFormProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/CaAlumnos`;
+
 export const AlumnoForm: React.FC<AlumnoFormProps> = ({
     form,
     isEditing,
@@ -44,7 +46,7 @@ export const AlumnoForm: React.FC<AlumnoFormProps> = ({
 
             if (msg.type === 'ready') {
                 try {
-                    popup.postMessage({ type: 'init', apiBase: '/api/CaAlumnos' }, window.location.origin);
+                    popup.postMessage({ type: 'init', apiBase: API_BASE }, window.location.origin);
                 } catch {
                     // ignore
                 }
@@ -189,7 +191,7 @@ export const AlumnoForm: React.FC<AlumnoFormProps> = ({
             {showUpload && (
                 <AlumnoUploadWizard
                     onClose={() => setShowUpload(false)}
-                    apiBase="/api/CaAlumnos"
+                    apiBase={API_BASE}
                 />
             )}
         </div>

@@ -10,7 +10,7 @@ interface Props {
 
 type ParsedRow = Record<string, unknown>;
 
-const DEFAULT_BASE = 'https://localhost:7231/api/CaAlumnos';
+const DEFAULT_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/CaAlumnos`;
 
 export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT_BASE }) => {
     const [fileName, setFileName] = useState<string | null>(null);
@@ -65,15 +65,7 @@ export const AlumnoUploadWizard: React.FC<Props> = ({ onClose, apiBase = DEFAULT
             const u = new URL(base);
             return u.toString().replace(/\/+$/, '');
         } catch {
-            const origin = window.location.origin;
-            try {
-                const originUrl = new URL(origin);
-                originUrl.port = '7231';
-                const joined = new URL(base.replace(/^\/+/, ''), originUrl).toString();
-                return joined.replace(/\/+$/, '');
-            } catch {
-                return DEFAULT_BASE;
-            }
+            return DEFAULT_BASE;
         }
     };
 

@@ -1,43 +1,41 @@
-import type { Grado, GradoForm } from "../types/gradoTypes";
+import { API_URLS } from '../utils/constants';
+import type { Grado, GradoForm } from '../types/gradoTypes';
 
-const API_URL = "https://localhost:7231/api/CaGrados";
+class GradoService {
+    private baseUrl = API_URLS.GRADOS;
 
-export const getGrados = async (): Promise<Grado[]> => {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-        throw new Error("Error al obtener los grados");
+    async getAll(): Promise<Grado[]> {
+        const response = await fetch(this.baseUrl);
+        if (!response.ok) throw new Error('Failed to fetch grados');
+        return response.json();
     }
-    return response.json();
-};
 
-export const addGrado = async (grado: GradoForm): Promise<Grado> => {
-    const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(grado),
-    });
-    if (!response.ok) {
-        throw new Error("Error al agregar el grado");
+    async create(grado: GradoForm): Promise<Grado> {
+        const response = await fetch(this.baseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(grado),
+        });
+        if (!response.ok) throw new Error('Failed to create grado');
+        return response.json();
     }
-    return response.json();
-};
 
-export const updateGrado = async (id: number, grado: GradoForm): Promise<void> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ caGradNId: id, ...grado }),
-    });
-    if (!response.ok) {
-        throw new Error("Error al actualizar el grado");
+    async update(id: number, grado: GradoForm): Promise<Grado> {
+        const response = await fetch(`${this.baseUrl}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(grado),
+        });
+        if (!response.ok) throw new Error('Failed to update grado');
+        return response.json();
     }
-};
 
-export const deleteGrado = async (id: number): Promise<void> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
-    });
-    if (!response.ok) {
-        throw new Error("Error al eliminar el grado");
+    async delete(id: number): Promise<void> {
+        const response = await fetch(`${this.baseUrl}/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete grado');
     }
-};
+}
+
+export const gradoService = new GradoService();

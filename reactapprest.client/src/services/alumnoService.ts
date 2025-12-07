@@ -1,61 +1,43 @@
 import type { Alumno, AlumnoCreate, AlumnoUpdate } from '../types/alumnoTypes';
-import { API_URLS } from '../utils/constants';
 
-class AlumnoService {
-    private baseUrl = API_URLS.ALUMNOS;
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/CaAlumnos`;
 
-    async getAll(): Promise<Alumno[]> {
-        const response = await fetch(this.baseUrl);
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        return await response.json();
+export const getAlumnos = async (): Promise<Alumno[]> => {
+    const response = await fetch(API_BASE_URL);
+    if (!response.ok) {
+        throw new Error('Failed to fetch alumnos');
     }
+    return response.json();
+};
 
-    async getById(id: number): Promise<Alumno> {
-        const response = await fetch(`${this.baseUrl}/${id}`);
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        return await response.json();
+export const createAlumno = async (alumno: AlumnoCreate): Promise<Alumno> => {
+    const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(alumno),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to create alumno');
     }
+    return response.json();
+};
 
-    async create(alumno: AlumnoCreate): Promise<Alumno> {
-        const response = await fetch(this.baseUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(alumno),
-        });
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        return await response.json();
+export const updateAlumno = async (id: number, alumno: AlumnoUpdate): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(alumno),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update alumno');
     }
+};
 
-    async update(id: number, alumno: AlumnoUpdate): Promise<Alumno> {
-        const response = await fetch(`${this.baseUrl}/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(alumno),
-        });
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        return await response.json();
+export const deleteAlumno = async (id: number): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+        method: 'DELETE',
+    });
+    if (!response.ok) {
+        throw new Error('Failed to delete alumno');
     }
-
-    async delete(id: number): Promise<void> {
-        const response = await fetch(`${this.baseUrl}/${id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-    }
-}
-
-export const alumnoService = new AlumnoService();
+};

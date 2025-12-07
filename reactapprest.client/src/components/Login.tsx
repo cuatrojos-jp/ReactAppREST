@@ -4,7 +4,7 @@ interface LoginProps {
     onLogin: () => void;
 }
 
-const API_URL = "https://localhost:7231/api/Usuarios";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/Usuarios`;
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const [usuarioNombre, setUsuarioNombre] = useState('');
