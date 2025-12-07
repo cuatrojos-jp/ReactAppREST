@@ -14,6 +14,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
         ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Clear known networks and proxies, as we're running behind Render's proxy
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 // Add DbContext
@@ -26,7 +29,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowVercelApp",
         policy =>
         {
-            policy.WithOrigins("https://reactapprest-client-fs21qhhs6-juan-acostas-projects-6a1ced6a.vercel.app/", "http://localhost:5173")
+            policy.WithOrigins("https://reactapprest-client-fs21qhhs6-juan-acostas-projects-6a1ced6a.vercel.app", "http://localhost:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -45,8 +48,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// UseHttpsRedirection should come after UseForwardedHeaders
-app.UseHttpsRedirection();
+// REMOVED: UseHttpsRedirection is not needed behind Render's proxy
+// app.UseHttpsRedirection();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
