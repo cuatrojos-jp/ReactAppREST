@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getUsuariosPorPerfil } from '../../services/perfilService';
+import { perfilService } from '../../services/perfilService';
 import type { Usuario } from '../../types/usuarioTypes';
 
 const PerfilUsuarios: React.FC = () => {
@@ -14,7 +14,7 @@ const PerfilUsuarios: React.FC = () => {
             const fetchUsuarios = async () => {
                 try {
                     setLoading(true);
-                    const data = await getUsuariosPorPerfil(Number(id));
+                    const data = await perfilService.getUsuariosPorPerfil(Number(id));
                     setUsuarios(data);
                 } catch (err) {
                     setError((err as Error).message);
@@ -51,7 +51,7 @@ const PerfilUsuarios: React.FC = () => {
                         <tr key={u.usuarioId}>
                             <td>{u.usuarioNombre}</td>
                             <td>{`${u.usuarioApPat || ''} ${u.usuarioApMat || ''}`}</td>
-                            <td>{u.usuarioActivo ? 'Sí' : 'No'}</td>
+                            <td>{u.usuarioActivo ? 'S\u00ED' : 'No'}</td>
                         </tr>
                     ))}
                 </tbody>
