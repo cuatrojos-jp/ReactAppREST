@@ -26,7 +26,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowVercelApp",
         policy =>
         {
-            policy.WithOrigins("https://reactapprest-client-fs21qhhs6-juan-acostas-projects-6a1ced6a.vercel.app", "http://localhost:5173")
+            policy.WithOrigins("https://reactapprest-client-fs21qhhs6-juan-acostas-projects-6a1ced6a.vercel.app/", "http://localhost:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
