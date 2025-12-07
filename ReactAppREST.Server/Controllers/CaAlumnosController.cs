@@ -11,7 +11,7 @@ namespace ReactAppREST.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [EnableCors("MyAllowSpecificOrigins")]
+    [EnableCors("AllowVercelApp")]
     public class CaAlumnosController : ControllerBase
     {
         private readonly SemestrefrontContext _context;
@@ -23,7 +23,6 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Alumnos (Sin cambios)
         [HttpGet]
-        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<IEnumerable<object>>> GetAlumnos()
         {
             var alumnos = await _context.CaAlumnos
@@ -47,7 +46,6 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Alumnos/5 (Sin cambios)
         [HttpGet("{id}")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<object>> GetAlumno(int id)
         {
             var alumno = await _context.CaAlumnos
@@ -74,7 +72,6 @@ namespace ReactAppREST.Server.Controllers
 
         // POST: api/Alumnos
         [HttpPost]
-        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<CaAlumno>> PostAlumno([FromBody] AlumnoCreateDto alumnoDto)
         {
             if (alumnoDto == null)
@@ -105,7 +102,6 @@ namespace ReactAppREST.Server.Controllers
 
         // PUT: api/Alumnos/5
         [HttpPut("{id}")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> PutAlumno(int id, [FromBody] AlumnoUpdateDto alumnoDto)
         {
             var alumnoExistente = await _context.CaAlumnos.FindAsync(id);
@@ -132,7 +128,6 @@ namespace ReactAppREST.Server.Controllers
 
         // DELETE: api/Alumnos/5 (Sin cambios)
         [HttpDelete("{id}")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> DeleteAlumno(int id)
         {
             var alumno = await _context.CaAlumnos.FindAsync(id);
@@ -147,7 +142,6 @@ namespace ReactAppREST.Server.Controllers
 
         // PATCH: api/Alumnos/activar/5 (Sin cambios)
         [HttpPatch("activar/{id}")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> ActivarAlumno(int id)
         {
             var alumno = await _context.CaAlumnos.FindAsync(id);
@@ -162,7 +156,6 @@ namespace ReactAppREST.Server.Controllers
 
         // PATCH: api/Alumnos/desactivar/5 (Sin cambios)
         [HttpPatch("desactivar/{id}")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> DesactivarAlumno(int id)
         {
             var alumno = await _context.CaAlumnos.FindAsync(id);
@@ -177,7 +170,6 @@ namespace ReactAppREST.Server.Controllers
 
         // POST: api/Alumnos/bulk
         [HttpPost("bulk")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> PostAlumnosBulk([FromBody] List<AlumnoCreateDto>? alumnosDto)
         {
             if (alumnosDto == null || alumnosDto.Count == 0)

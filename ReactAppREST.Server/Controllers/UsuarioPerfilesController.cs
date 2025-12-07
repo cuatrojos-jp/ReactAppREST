@@ -7,7 +7,7 @@ namespace ReactAppREST.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [EnableCors("MyAllowSpecificOrigins")]
+    [EnableCors("AllowVercelApp")]
     public class UsuarioPerfilesController : ControllerBase
     {
         private readonly SemestrefrontContext _context;
@@ -19,7 +19,6 @@ namespace ReactAppREST.Server.Controllers
 
         // POST: api/UsuarioPerfiles/asignar
         [HttpPost("asignar")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> AsignarPerfil([FromBody] UsuarioPerfilDto asignacion)
         {
             var usuario = await _context.Usuarios.Include(u => u.UsuarioPerfils).FirstOrDefaultAsync(u => u.UsuarioId == asignacion.UsuarioId);
@@ -47,7 +46,6 @@ namespace ReactAppREST.Server.Controllers
 
         // DELETE: api/UsuarioPerfiles/remover
         [HttpDelete("remover")]
-        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> RemoverPerfil([FromBody] UsuarioPerfilDto asignacion)
         {
             var usuario = await _context.Usuarios.Include(u => u.UsuarioPerfils).FirstOrDefaultAsync(u => u.UsuarioId == asignacion.UsuarioId);
