@@ -4,52 +4,56 @@ using ReactAppREST.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Define a specific CORS policy
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowVercelApp",
-        policy =>
-        {
-            // Add the specific Vercel URL from the error message
-            policy.WithOrigins("https://reactapprest-client-fs21qhhs6-juan-acostas-projects-6a1ced6a.vercel.app", "http://localhost:5173")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
-});
-
-// Add services to the container.
+// 1. Configure Services
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<SemestrefrontContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Configure the app to trust headers from a reverse proxy
+// Configure the app to trust headers from a reverse proxy like Render
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
         ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 });
 
+// Add DbContext
+builder.Services.AddDbContext<SemestrefrontContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Define and add the CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVercelApp",
+        policy =>
+        {
+            policy.WithOrigins("https://reactapprest-client-fs21qhhs6-juan-acostas-projects-6a1ced6a.vercel.app", "http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
+// 2. Build the App
 var app = builder.Build();
 
-// Use the forwarded headers middleware
+// 3. Configure the HTTP request pipeline (Middleware Order is Important)
 app.UseForwardedHeaders();
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
-// Configure the HTTP request pipeline.
+// In production, Swagger should be disabled.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// UseHttpsRedirection should come after UseForwardedHeaders
 app.UseHttpsRedirection();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+// UseRouting is implicitly called here in .NET 8
+
+// CORS must be placed after UseRouting and before UseAuthorization
 app.UseCors("AllowVercelApp");
 
 app.UseAuthorization();
@@ -58,4 +62,5 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
+// 4. Run the App
 app.Run();
