@@ -21,6 +21,7 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Usuarios
         [HttpGet]
+        [EnableCors("AllowVercelApp")]
         public async Task<ActionResult<IEnumerable<UsuarioDto>>> GetUsuarios()
         {
             var usuarios = await _context.Usuarios
@@ -41,6 +42,7 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
+        [EnableCors("AllowVercelApp")]
         public async Task<ActionResult<UsuarioDto>> GetUsuario(int id)
         {
             var usuarioDto = await _context.Usuarios
@@ -64,6 +66,7 @@ namespace ReactAppREST.Server.Controllers
 
         // POST: api/Usuarios/login (Sin cambios)
         [HttpPost("login")]
+        [EnableCors("AllowVercelApp")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (loginRequest == null || string.IsNullOrWhiteSpace(loginRequest.UsuarioNombre) || string.IsNullOrWhiteSpace(loginRequest.UsuarioPw))
@@ -89,6 +92,7 @@ namespace ReactAppREST.Server.Controllers
 
         // POST: api/Usuarios
         [HttpPost]
+        [EnableCors("AllowVercelApp")]
         public async Task<ActionResult<UsuarioDto>> PostUsuario(UsuarioCreateDto usuarioDto)
         {
             if (await _context.Usuarios.AnyAsync(u => u.UsuarioNombre == usuarioDto.UsuarioNombre))
@@ -134,6 +138,7 @@ namespace ReactAppREST.Server.Controllers
 
         // PUT: api/Usuarios/5
         [HttpPut("{id}")]
+        [EnableCors("AllowVercelApp")]
         public async Task<IActionResult> PutUsuario(int id, UsuarioUpdateDto usuarioDto)
         {
             var usuarioExistente = await _context.Usuarios
@@ -178,6 +183,7 @@ namespace ReactAppREST.Server.Controllers
 
         // DELETE: api/Usuarios/5 (Sin cambios)
         [HttpDelete("{id}")]
+        [EnableCors("AllowVercelApp")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);

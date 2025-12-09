@@ -7,7 +7,8 @@ namespace ReactAppREST.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [EnableCors("AllowVercelApp")]
+    //[EnableCors("AllowVercelApp")]
+    [EnableCors("AllowAllOrigins")]
     public class CaGradosController : ControllerBase
     {
         private readonly SemestrefrontContext _context;
@@ -19,7 +20,8 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Grados
         [HttpGet]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<IEnumerable<CaGrado>>> GetGrados()
         {
             var grados = await _context.CaGrados
@@ -31,7 +33,8 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Grados/5
         [HttpGet("{id}")]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<CaGrado>> GetGrado(int id)
         {
             var grado = await _context.CaGrados
@@ -46,7 +49,8 @@ namespace ReactAppREST.Server.Controllers
 
         // POST: api/Grados
         [HttpPost]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<CaGrado>> PostGrado(CaGrado grado)
         {
             if (grado == null)
@@ -60,7 +64,8 @@ namespace ReactAppREST.Server.Controllers
 
         // PUT: api/Grados/5
         [HttpPut("{id}")]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> PutGrado(int id, CaGrado grado)
         {
             if (id != grado.CaGradNId)
@@ -90,7 +95,8 @@ namespace ReactAppREST.Server.Controllers
 
         // DELETE: api/Grados/5
         [HttpDelete("{id}")]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> DeleteGrado(int id)
         {
             var grado = await _context.CaGrados.FindAsync(id);

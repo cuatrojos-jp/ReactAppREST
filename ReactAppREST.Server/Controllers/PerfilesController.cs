@@ -9,7 +9,8 @@ namespace ReactAppREST.Server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     // Apply the single, correct CORS policy to the entire controller
-    [EnableCors("AllowVercelApp")]
+    //[EnableCors("AllowVercelApp")]
+    [EnableCors("AllowAllOrigins")]
     public class PerfilesController : ControllerBase
     {
         private readonly SemestrefrontContext _context;
@@ -21,7 +22,8 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Perfiles
         [HttpGet]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<IEnumerable<PerfilDto>>> GetPerfiles([FromQuery] bool solamenteActivos = false)
         {
             var query = _context.Perfils.AsQueryable();
@@ -47,7 +49,8 @@ namespace ReactAppREST.Server.Controllers
 
         // NUEVO ENDPOINT: GET: api/Perfiles/5/usuarios
         [HttpGet("{id}/usuarios")]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<IEnumerable<UsuarioDto>>> GetUsuariosPorPerfil(int id)
         {
             var perfil = await _context.Perfils.FindAsync(id);
@@ -76,7 +79,8 @@ namespace ReactAppREST.Server.Controllers
 
         // GET: api/Perfiles/5 (sin cambios)
         [HttpGet("{id}")]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<Perfil>> GetPerfil(int id)
         {
             var perfil = await _context.Perfils.FindAsync(id);
@@ -91,7 +95,8 @@ namespace ReactAppREST.Server.Controllers
 
         // POST: api/Perfiles (sin cambios)
         [HttpPost]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<ActionResult<Perfil>> PostPerfil(Perfil perfil)
         {
             _context.Perfils.Add(perfil);
@@ -102,7 +107,8 @@ namespace ReactAppREST.Server.Controllers
 
         // PUT: api/Perfiles/5 (sin cambios)
         [HttpPut("{id}")]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> PutPerfil(int id, Perfil perfil)
         {
             if (id != perfil.PerfilId)
@@ -133,7 +139,8 @@ namespace ReactAppREST.Server.Controllers
 
         // DELETE: api/Perfiles/5 (sin cambios)
         [HttpDelete("{id}")]
-        [EnableCors("AllowVercelApp")]
+        //[EnableCors("AllowVercelApp")]
+        [EnableCors("AllowAllOrigins")]
         public async Task<IActionResult> DeletePerfil(int id)
         {
             var perfil = await _context.Perfils.FindAsync(id);
